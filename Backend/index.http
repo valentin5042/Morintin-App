@@ -1,0 +1,5 @@
+GET http://localhost:3000/api/productos
+
+###
+
+POST http://192.168.1.69:3000/api/listas/${2}/addProduct/${3}
