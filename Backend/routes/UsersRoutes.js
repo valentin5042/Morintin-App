@@ -1,6 +1,7 @@
 // userRoutes.js
 import express from 'express';
 import UsersController from '../controllers/UsersController.js';
+import UsersModel from '../models/UsersModel.js';
 import jwt from 'jsonwebtoken';
 
 const router = express.Router();
@@ -23,6 +24,27 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ error: 'Error al iniciar sesión' });
   }
 });
+
+router.get('/nombre', async (req, res) => {
+  try {
+    // Obtener el nombre de usuario del token en la solicitud
+    const token = req.headers.authorization.split(' ')[1]; // Obtiene el token del encabezado Authorization
+    const decodedToken = jwt.verify(token, 'mi_secreto');
+    const email = decodedToken.email;
+
+    // Realizar la consulta en la base de datos para obtener el nombre de usuario usando el correo electrónico
+    const usuario = await UsersModel.getUserByEmail(email);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    // Enviar el nombre de usuario como respuesta
+    res.json({ nombreUsuario: usuario.nombre });
+  } catch (error) {
+    console.error('Error al obtener el nombre de usuario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 
 //cerrar sesión
 router.post('/logout', (req, res) => {

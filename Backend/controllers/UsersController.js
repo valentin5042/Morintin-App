@@ -32,24 +32,35 @@ const UsersController = {
   },
   login: async (req, res) => {
     const { email, password } = req.body;
-  
-    console.log('Solicitud de inicio de sesión recibida:', { email, password }); 
     try {
       // Verificar las credenciales del usuario por correo electrónico
       const user = await UsersModel.getUserByCredentials(email, password);
-      console.log('Usuario obtenido:', user); 
       if (!user) {
-        console.log('Credenciales inválidas');
         return res.status(401).json({ error: 'Credenciales inválidas' });
       }
-      // Si las credenciales son válidas, generar un nuevo token JWT y enviarlo como respuesta
+      // Generar un nuevo token JWT
       const token = jwt.sign({ email }, 'mi_secreto', { expiresIn: '1h' });
-      console.log('Token generado:', token); 
-      res.json({ token });
+      // Enviar el token y el nombre de usuario como respuesta
+      res.json({ token, nombreUsuario: user.nombre });
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       res.status(500).json({ error: 'Error interno del servidor' });
     }
+  },
+  getUserByEmail: async (email) => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        'SELECT * FROM usuarios WHERE email = ?',
+        [email],
+        (err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results[0]);
+          }
+        }
+      );
+    });
   },
   logout: (req, res) => {
     // Eliminar el token del almacenamiento local del cliente

@@ -63,7 +63,9 @@ const UsersModel = {
                       reject(updateErr);
                     } else {
                       console.log('Nuevo token', token);
-                      resolve({ usuario, token });
+                      // Incluimos el nombre de usuario en el objeto resuelto
+                      usuario.token = token;
+                      resolve(usuario);
                     }
                   }
                 );
@@ -71,6 +73,21 @@ const UsersModel = {
                 resolve(null);
               }
             }
+          }
+        }
+      );
+    });
+  },
+  getUserByEmail: async function(email) {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        'SELECT * FROM usuarios WHERE email = ?',
+        [email],
+        (err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results[0]);
           }
         }
       );
